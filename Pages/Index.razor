@@ -1,9 +1,89 @@
 ﻿@page "/"
+@using Microsoft.AspNetCore.SignalR.Client
+@using System;
+@using System.Collections;
+@using System.Collections.Generic;
+@inject NavigationManager NavManager
+@implements IAsyncDisposable
+<div class="form-label">
+    <label for="User">User: </label>
+    <input type="text" @bind-value="userInput" id="User" class="form-data"/>
+</div>
+<div class="form-label">
+    <label for="message">Message: </label>
+    <input type="text"  id="message" class="form-data" @bind-value="messageInput" @onkeydown="() => TypingAsync(true)" @onkeyup="() => TypingAsync(false)"/>
+</div>
+<div class="form-label">
+    <label for="submit"></label>
+    <input type="button" id="submit" value="Send" @onclick="(() => SendMessage())" class="form-data"/>
+</div>
+<p>@typingMessage</p>
+<ul>
+    @foreach (var message in messages)
+    {
+        <li>@message</li>
+    }
+</ul>
+@code {
+    private List<String> messages = new();
+    private HubConnection? hubConnection;
+    private string? userInput = string.Empty;
+    private string? messageInput = string.Empty;
+    private string? typingMessage = string.Empty;
+    private bool isTyping = false;
+    private Task typing = Task.Delay(0);
 
-<PageTitle>Index</PageTitle>
+    protected async override Task OnInitializedAsync()
+    {
+        hubConnection = new HubConnectionBuilder().
+        WithUrl(NavManager.ToAbsoluteUri("/chathub")).
+        Build();
 
-<h1>Hello, world!</h1>
+        hubConnection.On<string, string>("ReceiveMessage", (user, message) =>
+        {
+            var formattedMessage = $"{user}: {message}";
+            messages.Add(formattedMessage);
+            InvokeAsync(StateHasChanged);
+        });
+        hubConnection.On<string,bool>("ReceiveIsTyping", async (user,isTyping) =>
+        {
 
-Welcome to your new app.
+            if (isTyping)
+            {
+                typingMessage = $"{user} is Typing...";
+            }
+            else
+            {
+                typingMessage = "";
+            }
+            InvokeAsync(StateHasChanged);
+        });
+        await hubConnection.StartAsync();
+    }
+    private async void SendMessage()
+    {
 
-<SurveyPrompt Title="How is Blazor working for you?" />
+        if(hubConnection is not null)
+        {
+            await hubConnection.SendAsync("sendMessage", userInput, messageInput);
+        }
+
+    }
+    private async void TypingAsync(bool typing)
+    {
+        if(hubConnection is not null)
+        {
+            await hubConnection.SendAsync("sendIsTyping", userInput,  typing);
+        }
+    }
+
+    public bool isConnected => hubConnection?.State == HubConnectionState.Connected;
+
+    public async ValueTask DisposeAsync()
+    {
+        if(hubConnection is not null)
+        {
+            await hubConnection.DisposeAsync();
+        }
+    }
+}
