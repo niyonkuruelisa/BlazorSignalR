@@ -10,12 +10,12 @@
     <input type="text" @bind-value="userInput" id="User" class="form-data"/>
 </div>
 <div class="form-label">
-    <label for="message">Message: </label>
-    <input type="text"  id="message" class="form-data" @bind-value="messageInput" @onkeydown="() => TypingAsync(true)" @onkeyup="() => TypingAsync(false)"/>
+    <p for="message">Message: </p>
+    <textarea rows="2"  id="message" class="form-data" @onkeydown="() => TypingAsync(true)" @onkeyup="() => TypingAsync(false)">@messageInput</textarea>
 </div>
 <div class="form-label">
-    <label for="submit"></label>
-    <input type="button" id="submit" value="Send" @onclick="(() => SendMessage())" class="form-data"/>
+    <label ></label>
+    <input type="button" value="Send" @onclick="(() => SendMessage())" class="form-data"/>
 </div>
 <p>@typingMessage</p>
 <ul>
