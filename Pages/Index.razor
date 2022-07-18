@@ -64,9 +64,12 @@
     private async void SendMessage()
     {
 
+        var message = messageInput;
         if(hubConnection is not null)
-        {
-            await hubConnection.SendAsync("sendMessage", userInput, messageInput);
+        {   //reset Messages;
+            messageInput = "";
+            await hubConnection.SendAsync("sendMessage", userInput, message);
+            
         }
 
     }
