@@ -11,7 +11,7 @@
 </div>
 <div class="form-label">
     <p for="message">Message: </p>
-    <textarea rows="2"  id="message" class="form-data" @onkeydown="() => TypingAsync(true)" @onkeyup="() => TypingAsync(false)">@messageInput</textarea>
+    <textarea rows="2"  value="@messageInput" @onchange="@((args) => messageInput = args.Value.ToString())" id="message" class="form-data" @onkeydown="() => TypingAsync(true)" @onkeyup="() => TypingAsync(false)"></textarea>
 </div>
 <div class="form-label">
     <label ></label>
