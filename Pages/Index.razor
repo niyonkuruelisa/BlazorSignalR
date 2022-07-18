@@ -43,6 +43,7 @@
         {
             var formattedMessage = $"{user}: {message}";
             messages.Add(formattedMessage);
+            messages.Reverse();
             InvokeAsync(StateHasChanged);
         });
         hubConnection.On<string,bool>("ReceiveIsTyping", async (user,isTyping) =>
